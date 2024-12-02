@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Wisdom Search Engine</title>
+    <meta name="description" content="Open Data and Open Knowledge Search Engine ">
+    <meta name="keywords" content="opensource, search engine, wikipedia, archive">
+    <meta name="author" content="André Machado">
+    <meta name="robots" content="index, follow">
+    <meta name="revisit-after" content="1 day">
+    <meta name="language" content="English">
+    <meta name="generator" content="VS Code">
+    <meta name="distribution" content="global">
+    <meta name="rating" content="general">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Helvetica+Neue:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="icon.png" type="image/png">
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            font-family: 'Roboto', sans-serif;
+            background-color: #f0f2f5;
+            color: #333;
+        }
+    
+        .container {
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+    
+        header {
+            background-color: #000000;
+            color: #fff;
+            padding: 30px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+        }
+    
+        h1 {
+            font-size: 32px;
+            margin: 0;
+            font-weight: 300;
+        }
+    
+        main {
+            padding: 40px;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+    
+        form {
+            display: flex;
+            margin-bottom: 20px;
+            justify-content: center;
+            flex-wrap: wrap; /* Allow wrapping on smaller screens */
+        }
+    
+        input[type="text"] {
+            width: 60%;
+            padding: 12px;
+            font-size: 18px;
+            border: 1px solid #ced4da;
+            border-radius: 25px;
+            margin-right: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+    
+        button[type="submit"] {
+            padding: 12px 24px;
+            font-size: 18px;
+            background: linear-gradient(45deg, #007bff, #0056b3);
+            color: #fff;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+    
+        button[type="submit"]:hover {
+            background: linear-gradient(45deg, #0056b3, #003f7f);
+        }
+    
+        #search-results {
+            display: grid;
+            grid-gap: 20px;
+            width: 100%;
+        }
+    
+        .result {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 15px; /* Rounded corners */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            margin-bottom: 20px; /* Space between results */
+            width: calc(100% - 40px); /* Ensure result boxes fit the screen with padding */
+            margin-left: auto;
+            margin-right: auto;
+        }
+    
+        .result h2 {
+            margin: 0;
+            font-size: 24px;
+            color: #333;
+        }
+    
+        .result a {
+            color: #007bff;
+            text-decoration: none;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+    
+        .result a:hover {
+            text-decoration: underline;
+        }
+    
+        .results {
+            display: none;
+        }
+    
+        .results.active {
+            display: block;
+        }
+    
+        .tabs {
+            display: flex;
+            margin-bottom: 10px;
+            overflow-x: auto;
+            width: 100%;
+            scrollbar-width: none;
+            justify-content: center; /* Center the tabs */
+        }
+        
+        .tab {
+            padding: 10px;
+            cursor: pointer;
+            border: 1px solid #ced4da;
+            margin-right: 5px;
+            white-space: nowrap;
+            transition: background-color 0.3s;
+            border-radius: 25px;
+        }
+        
+        .tab.active {
+            background-color: #0056b3; /* Highlight the active tab with blue color */
+            color: white; /* Optional: Change text color to white for better contrast */
+            border-bottom: none;
+        }
+        
+        .tab:hover {
+            background-color: #0056b3;
+            color: white;
+        }
+    
+        footer {
+            background-color: #0056b3;
+            color: #fff;
+            padding: 30px;
+            text-align: center;
+            margin-top: auto;
+            font-size: 18px;
+        }
+    
+        /* Media Queries for Mobile Devices */
+        @media (max-width: 768px) {
+            header {
+                padding: 20px;
+                font-size: 20px;
+            }
+        
+            h1 {
+                font-size: 28px;
+            }
+        
+            main {
+                padding: 20px;
+            }
+        
+            input[type="text"] {
+                width: 100%;
+                margin-bottom: 10px; /* Add margin for spacing */
+            }
+        
+            button[type="submit"] {
+                width: 100%;
+                padding: 12px;
+            }
+        
+            .result h2 {
+                font-size: 20px;
+            }
+    
+            .result {
+                padding: 15px;
+                font-size: 14px;
+            }
+    
+            .result img {
+                width: 100%;
+                height: auto;
+            }
+        
+            footer {
+                padding: 20px;
+                font-size: 16px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            header {
+                padding: 15px;
+                font-size: 18px;
+            }
+        
+            h1 {
+                font-size: 24px;
+            }
+        
+            main {
+                padding: 15px;
+            }
+        
+            input[type="text"] {
+                font-size: 16px;
+            }
+        
+            button[type="submit"] {
+                font-size: 16px;
+            }
+        
+            .result h2 {
+                font-size: 18px;
+            }
+    
+            .result {
+                padding: 10px;
+                font-size: 12px;
+            }
+    
+            .result img {
+                width: 100%;
+                height: auto;
+            }
+        
+            footer {
+                padding: 15px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <a href="index.html"><h1 style="color: White;">𝑾𝒊𝒔𝒅𝒐𝒎 𝑺𝒆𝒂𝒓𝒄𝒉 𝑬𝒏𝒈𝒊𝒏𝒆</h1></a>
+        </header>
+        <main>
+            <img src="icon.png" alt="Wisdom Search Engine" style="display: block; margin: 0 auto 20px auto; width: 200px; height: 200px; border-radius: 50%;">
+            <form id="search-form">
+                <input type="text" id="search-input" placeholder="Search..." style="margin-right: 10px;">
+                <button type="submit">Search</button>
+            </form>
+            <div id="search-results"></div>
+            <script>
+                document.addEventListener('DOMContentLoaded', () => {
+                    const searchForm = document.getElementById('search-form');
+                    const searchInput = document.getElementById('search-input');
+                    const searchResults = document.getElementById('search-results');
+            
+                    // Create top tabs container
+                    const topTabsContainer = document.createElement('div');
+                    topTabsContainer.className = 'tabs';
+                    searchResults.parentNode.insertBefore(topTabsContainer, searchResults);
+            
+                    // Create bottom tabs container
+                    const bottomTabsContainer = document.createElement('div');
+                    bottomTabsContainer.className = 'tabs';
+                    bottomTabsContainer.style.marginTop = '10px'; // Add margin-top
+                    searchResults.parentNode.insertBefore(bottomTabsContainer, searchResults.nextSibling);
+            
+                    searchForm.addEventListener('submit', async (event) => {
+                        event.preventDefault();
+            
+                        // Clear previous search results
+                        searchResults.innerHTML = '';
+                        topTabsContainer.innerHTML = '';
+                        bottomTabsContainer.innerHTML = '';
+            
+                        try {
+                            const query = encodeURIComponent(searchInput.value);
+            
+                            // Parallelize API requests
+                            const [
+                                wikipediaResponse,
+                                archiveResponse,
+                                gutenbergResponse,
+                                openLibraryResponse,
+                                harvardDataverseResponse,
+                                googleBooksResponse,
+                                crossrefResponse,
+                                peertubeResponse,
+                                wikimediaCommonsResponse
+                            ] = await Promise.all([
+                                fetch(`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${query}&format=json&origin=*`),
+                                fetch(`https://archive.org/advancedsearch.php?q=${query}&output=json`),
+                                fetch(`https://gutendex.com/books/?search=${query}`),
+                                fetch(`https://openlibrary.org/search.json?q=${query}`),
+                                fetch(`https://dataverse.harvard.edu/api/search?q=${query}`),
+                                fetch(`https://www.googleapis.com/books/v1/volumes?q=${query}`),
+                                fetch(`https://api.crossref.org/works?query=${query}`),
+                                fetch(`https://sepiasearch.org/api/v1/search/videos?search=${query}&searchTarget=search-index&resultType=videos&nsfw=false&count=100&start=0`),
+                                fetch(`https://commons.wikimedia.org/w/api.php?action=query&list=search&srsearch=${query}&srnamespace=6&format=json&origin=*`)
+                            ]);
+            
+                            // Check all responses
+                            if (!wikipediaResponse.ok) throw new Error('Wikipedia API request failed');
+                            if (!archiveResponse.ok) throw new Error('Archive.org API request failed');
+                            if (!gutenbergResponse.ok) throw new Error('Project Gutenberg API request failed');
+                            if (!openLibraryResponse.ok) throw new Error('Open Library API request failed');
+                            if (!harvardDataverseResponse.ok) throw new Error('Harvard Dataverse API request failed');
+                            if (!googleBooksResponse.ok) throw new Error('Google Books API request failed');
+                            if (!crossrefResponse.ok) throw new Error('Crossref API request failed');
+                            if (!peertubeResponse.ok) throw new Error('PeerTube API request failed');
+                            if (!wikimediaCommonsResponse.ok) throw new Error('Wikimedia Commons API request failed');
+
+                            // Parse all responses
+                            const [
+                                wikipediaData,
+                                archiveData,
+                                gutenbergData,
+                                openLibraryData,
+                                harvardDataverseData,
+                                googleBooksData,
+                                crossrefData,
+                                peertubeData,
+                                wikimediaCommonsData
+                            ] = await Promise.all([
+                                wikipediaResponse.json(),
+                                archiveResponse.json(),
+                                gutenbergResponse.json(),
+                                openLibraryResponse.json(),
+                                harvardDataverseResponse.json(),
+                                googleBooksResponse.json(),
+                                crossrefResponse.json(),
+                                peertubeResponse.json(),
+                                wikimediaCommonsResponse.json()
+                            ]);
+            
+                            // Process results
+                            const wikipediaResults = wikipediaData.query.search.map(result => ({
+                                title: result.title,
+                                description: result.snippet,
+                                source: `https://en.wikipedia.org/wiki/${result.title}`
+                            }));
+            
+                            const archiveResults = archiveData.response.docs.map(result => ({
+                                title: result.title || 'No Title',
+                                description: result.description || 'No Description',
+                                source: `https://archive.org/details/${result.identifier}`
+                            }));
+            
+                            const gutenbergResults = gutenbergData.results.map(result => ({
+                                title: result.title || 'No Title',
+                                description: result.formats[Object.keys(result.formats)[0]] || 'No Description',
+                                source: Object.values(result.formats)[0]
+                            }));
+            
+                            const openLibraryResults = openLibraryData.docs.map(result => ({
+                                title: result.title || 'No Title',
+                                description: result.first_sentence || 'No Description',
+                                source: `https://openlibrary.org${result.key}`
+                            }));
+            
+                            const harvardDataverseResults = harvardDataverseData.data.items.map(result => ({
+                                title: result.name || 'No Title',
+                                description: result.description || 'No Description',
+                                source: `https://dataverse.harvard.edu/dataset.xhtml?persistentId=${result.global_id}`
+                            }));
+            
+                            const googleBooksResults = googleBooksData.items.map(result => ({
+                                title: result.volumeInfo.title || 'No Title',
+                                description: result.volumeInfo.description || 'No Description',
+                                source: result.volumeInfo.infoLink
+                            }));
+            
+                            const crossrefResults = crossrefData.message.items.map(result => ({
+                                title: result.title[0] || 'No Title',
+                                description: result.abstract || 'No Description',
+                                source: result.URL
+                            }));
+            
+                            const peertubeResults = peertubeData.data.map(video => ({
+                                title: video.name,
+                                description: video.description,
+                                source: video.url,
+                                thumbnail: video.thumbnailUrl,
+                                date: new Date(video.publishedAt).toLocaleDateString(),
+                                instance: video.account.url,
+                                account: video.account.displayName
+                            }));
+
+                            const wikimediaCommonsResults = wikimediaCommonsData.query.search.map(result => ({
+                                title: result.title,
+                                description: result.snippet,
+                                source: `https://commons.wikimedia.org/wiki/${result.title}`
+                            }));
+            
+                            const allResults = [
+                                ...wikipediaResults,
+                                ...archiveResults,
+                                ...gutenbergResults,
+                                ...openLibraryResults,
+                                ...harvardDataverseResults,
+                                ...googleBooksResults,
+                                ...crossrefResults,
+                                ...peertubeResults,
+                                ...wikimediaCommonsResults
+                            ];
+            
+                            shuffleArray(allResults);
+            
+                            const resultsPerPage = 50;
+                            const pages = Math.ceil(allResults.length / resultsPerPage);
+                            const maxTabs = 10; // Maximum number of tabs to display
+            
+                            for (let i = 1; i <= Math.min(pages, maxTabs); i++) {
+                                const createTab = (container) => {
+                                    const tabElement = document.createElement('div');
+                                    tabElement.className = 'tab';
+                                    tabElement.textContent = `${i}`;
+                                    tabElement.addEventListener('click', () => {
+                                        document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+                                        document.querySelectorAll('.results').forEach(result => result.classList.remove('active'));
+                                        tabElement.classList.add('active');
+                                        document.getElementById(`results-page-${i}`).classList.add('active');
+                                    });
+                                    container.appendChild(tabElement);
+                                };
+            
+                                createTab(topTabsContainer);
+                                createTab(bottomTabsContainer);
+            
+                                const resultsPage = document.createElement('div');
+                                resultsPage.className = 'results';
+                                resultsPage.id = `results-page-${i}`;
+                                if (i === 1) {
+                                    topTabsContainer.children[0].classList.add('active');
+                                    bottomTabsContainer.children[0].classList.add('active');
+                                    resultsPage.classList.add('active');
+                                }
+                                allResults.slice((i - 1) * resultsPerPage, i * resultsPerPage).forEach((result) => {
+                                    const resultElement = document.createElement('div');
+                                    resultElement.className = 'result';
+                                    resultElement.innerHTML = `
+                                        <h2>${result.title}</h2>
+                                        ${result.thumbnail ? `<img src="${result.thumbnail}" alt="Thumbnail" style="width:100%; height:auto; max-width:350px;">` : ''}
+                                        ${result.date ? `<p><em>Date: ${result.date}</em></p>` : ''}
+                                        <p>${result.description}</p>
+                                        <p>Source: <a href="${result.source}" target="_blank">${result.source}</a></p>
+                                        ${result.instance ? `<p>By <a href="${result.instance}" target="_blank">${result.account}</a></p>` : ''}
+                                        <a href="${result.source}" target="_blank">Read more</a>
+                                    `;
+                                    resultsPage.appendChild(resultElement);
+                                });
+                                searchResults.appendChild(resultsPage);
+                            }
+            
+                            function shuffleArray(array) {
+                                for (let i = array.length - 1; i > 0; i--) {
+                                    const j = Math.floor(Math.random() * (i + 1));
+                                    [array[i], array[j]] = [array[j], array[i]];
+                                }
+                            }
+                        } catch (error) {
+                            console.error('Error during search:', error);
+                        }
+                    });
+                });
+            </script>
+        </main>
+        <footer>
+            <p>&copy; 2024 Wisdom Search Engine. All rights reserved.</p>
+        </footer>
+    </div>
+</body>
+</html>
