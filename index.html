@@ -274,6 +274,7 @@
                     const searchForm = document.getElementById('search-form');
                     const searchInput = document.getElementById('search-input');
                     const searchResults = document.getElementById('search-results');
+                    const searchButton = searchForm.querySelector('button[type="submit"]');
             
                     // Create top tabs container
                     const topTabsContainer = document.createElement('div');
@@ -293,6 +294,10 @@
                         searchResults.innerHTML = '';
                         topTabsContainer.innerHTML = '';
                         bottomTabsContainer.innerHTML = '';
+                        
+                        // Disable search button and show loading text
+                        searchButton.disabled = true;
+                        searchButton.textContent = 'Loading...';
             
                         try {
                             const query = encodeURIComponent(searchInput.value);
@@ -482,6 +487,10 @@
                         } catch (error) {
                             console.error('Error during search:', error);
                         }
+
+                        // Enable search button and reset text after search
+                        searchButton.disabled = false;
+                        searchButton.textContent = 'Search';
                     });
                 });
             </script>
