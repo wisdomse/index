@@ -406,7 +406,7 @@
                             })) || [];
                 
                             const crossrefResults = crossrefData.message?.items?.map(result => ({
-                                title: result.title[0] || 'No Title',
+                                title: result.title?.[0] || 'No Title',
                                 description: result.abstract || 'No Description',
                                 source: result.URL
                             })) || [];
