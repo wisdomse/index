@@ -359,49 +359,49 @@
                             ]);
             
                             // Process results
-                            const wikipediaResults = wikipediaData.query.search.map(result => ({
+                            const wikipediaResults = wikipediaData.query?.search?.map(result => ({
                                 title: result.title,
                                 description: result.snippet,
                                 source: `https://en.wikipedia.org/wiki/${result.title}`
-                            }));
+                            })) || [];
             
-                            const archiveResults = archiveData.response.docs.map(result => ({
+                            const archiveResults = archiveData.response?.docs?.map(result => ({
                                 title: result.title || 'No Title',
                                 description: result.description || 'No Description',
                                 source: `https://archive.org/details/${result.identifier}`
-                            }));
+                            })) || [];
             
-                            const gutenbergResults = gutenbergData.results.map(result => ({
+                            const gutenbergResults = gutenbergData.results?.map(result => ({
                                 title: result.title || 'No Title',
                                 description: result.formats[Object.keys(result.formats)[0]] || 'No Description',
                                 source: Object.values(result.formats)[0]
-                            }));
+                            })) || [];
             
-                            const openLibraryResults = openLibraryData.docs.map(result => ({
+                            const openLibraryResults = openLibraryData.docs?.map(result => ({
                                 title: result.title || 'No Title',
                                 description: result.first_sentence || 'No Description',
                                 source: `https://openlibrary.org${result.key}`
-                            }));
+                            })) || [];
             
-                            const harvardDataverseResults = harvardDataverseData.data.items.map(result => ({
+                            const harvardDataverseResults = harvardDataverseData.data?.items?.map(result => ({
                                 title: result.name || 'No Title',
                                 description: result.description || 'No Description',
                                 source: `https://dataverse.harvard.edu/dataset.xhtml?persistentId=${result.global_id}`
-                            }));
+                            })) || [];
             
-                            const googleBooksResults = googleBooksData.items.map(result => ({
+                            const googleBooksResults = googleBooksData.items?.map(result => ({
                                 title: result.volumeInfo.title || 'No Title',
                                 description: result.volumeInfo.description || 'No Description',
                                 source: result.volumeInfo.infoLink
-                            }));
+                            })) || [];
             
-                            const crossrefResults = crossrefData.message.items.map(result => ({
+                            const crossrefResults = crossrefData.message?.items?.map(result => ({
                                 title: result.title[0] || 'No Title',
                                 description: result.abstract || 'No Description',
                                 source: result.URL
-                            }));
+                            })) || [];
             
-                            const peertubeResults = peertubeData.data.map(video => ({
+                            const peertubeResults = peertubeData.data?.map(video => ({
                                 title: video.name,
                                 description: video.description,
                                 source: video.url,
@@ -409,13 +409,13 @@
                                 date: new Date(video.publishedAt).toLocaleDateString(),
                                 instance: video.account.url,
                                 account: video.account.displayName
-                            }));
+                            })) || [];
 
-                            const wikimediaCommonsResults = wikimediaCommonsData.query.search.map(result => ({
+                            const wikimediaCommonsResults = wikimediaCommonsData.query?.search?.map(result => ({
                                 title: result.title,
                                 description: result.snippet,
                                 source: `https://commons.wikimedia.org/wiki/${result.title}`
-                            }));
+                            })) || [];
             
                             const allResults = [
                                 ...wikipediaResults,
