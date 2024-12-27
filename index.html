@@ -274,33 +274,33 @@
                     const searchInput = document.getElementById('search-input');
                     const searchResults = document.getElementById('search-results');
                     const searchButton = searchForm.querySelector('button[type="submit"]');
-            
+                
                     // Create top tabs container
                     const topTabsContainer = document.createElement('div');
                     topTabsContainer.className = 'tabs';
                     searchResults.parentNode.insertBefore(topTabsContainer, searchResults);
-            
+                
                     // Create bottom tabs container
                     const bottomTabsContainer = document.createElement('div');
                     bottomTabsContainer.className = 'tabs';
                     bottomTabsContainer.style.marginTop = '10px'; // Add margin-top
                     searchResults.parentNode.insertBefore(bottomTabsContainer, searchResults.nextSibling);
-            
+                
                     searchForm.addEventListener('submit', async (event) => {
                         event.preventDefault();
-            
+                
                         // Clear previous search results
                         searchResults.innerHTML = '';
                         topTabsContainer.innerHTML = '';
                         bottomTabsContainer.innerHTML = '';
-                        
+                
                         // Disable search button and show loading text
                         searchButton.disabled = true;
                         searchButton.textContent = 'Loading...';
-            
+                
                         try {
                             const query = encodeURIComponent(searchInput.value);
-            
+                
                             // Parallelize API requests
                             const [
                                 wikipediaResponse,
@@ -323,18 +323,18 @@
                                 fetch(`https://sepiasearch.org/api/v1/search/videos?search=${query}&searchTarget=search-index&resultType=videos&nsfw=false&count=100&start=0`),
                                 fetch(`https://commons.wikimedia.org/w/api.php?action=query&list=search&srsearch=${query}&srnamespace=6&format=json&origin=*`)
                             ]);
-            
+                
                             // Check all responses
-                            if (!wikipediaResponse.ok) throw new Error('Wikipedia API request failed');
-                            if (!archiveResponse.ok) throw new Error('Archive.org API request failed');
-                            if (!gutenbergResponse.ok) throw new Error('Project Gutenberg API request failed');
-                            if (!openLibraryResponse.ok) throw new Error('Open Library API request failed');
-                            if (!harvardDataverseResponse.ok) throw new Error('Harvard Dataverse API request failed');
-                            if (!googleBooksResponse.ok) throw new Error('Google Books API request failed');
-                            if (!crossrefResponse.ok) throw new Error('Crossref API request failed');
-                            if (!peertubeResponse.ok) throw new Error('PeerTube API request failed');
-                            if (!wikimediaCommonsResponse.ok) throw new Error('Wikimedia Commons API request failed');
-
+                            if (!wikipediaResponse.ok) console.error('Wikipedia API request failed');
+                            if (!archiveResponse.ok) console.error('Archive.org API request failed');
+                            if (!gutenbergResponse.ok) console.error('Project Gutenberg API request failed');
+                            if (!openLibraryResponse.ok) console.error('Open Library API request failed');
+                            if (!harvardDataverseResponse.ok) console.error('Harvard Dataverse API request failed');
+                            if (!googleBooksResponse.ok) console.error('Google Books API request failed');
+                            if (!crossrefResponse.ok) console.error('Crossref API request failed');
+                            if (!peertubeResponse.ok) console.error('PeerTube API request failed');
+                            if (!wikimediaCommonsResponse.ok) console.error('Wikimedia Commons API request failed');
+                
                             // Parse all responses
                             const [
                                 wikipediaData,
@@ -357,50 +357,60 @@
                                 peertubeResponse.json(),
                                 wikimediaCommonsResponse.json()
                             ]);
-            
+                
+                            console.log('Wikipedia Data:', wikipediaData);
+                            console.log('Archive Data:', archiveData);
+                            console.log('Gutenberg Data:', gutenbergData);
+                            console.log('Open Library Data:', openLibraryData);
+                            console.log('Harvard Dataverse Data:', harvardDataverseData);
+                            console.log('Google Books Data:', googleBooksData);
+                            console.log('Crossref Data:', crossrefData);
+                            console.log('PeerTube Data:', peertubeData);
+                            console.log('Wikimedia Commons Data:', wikimediaCommonsData);
+                
                             // Process results
                             const wikipediaResults = wikipediaData.query?.search?.map(result => ({
                                 title: result.title,
                                 description: result.snippet,
                                 source: `https://en.wikipedia.org/wiki/${result.title}`
                             })) || [];
-            
+                
                             const archiveResults = archiveData.response?.docs?.map(result => ({
                                 title: result.title || 'No Title',
                                 description: result.description || 'No Description',
                                 source: `https://archive.org/details/${result.identifier}`
                             })) || [];
-            
+                
                             const gutenbergResults = gutenbergData.results?.map(result => ({
                                 title: result.title || 'No Title',
                                 description: result.formats[Object.keys(result.formats)[0]] || 'No Description',
                                 source: Object.values(result.formats)[0]
                             })) || [];
-            
+                
                             const openLibraryResults = openLibraryData.docs?.map(result => ({
                                 title: result.title || 'No Title',
                                 description: result.first_sentence || 'No Description',
                                 source: `https://openlibrary.org${result.key}`
                             })) || [];
-            
+                
                             const harvardDataverseResults = harvardDataverseData.data?.items?.map(result => ({
                                 title: result.name || 'No Title',
                                 description: result.description || 'No Description',
                                 source: `https://dataverse.harvard.edu/dataset.xhtml?persistentId=${result.global_id}`
                             })) || [];
-            
+                
                             const googleBooksResults = googleBooksData.items?.map(result => ({
                                 title: result.volumeInfo.title || 'No Title',
                                 description: result.volumeInfo.description || 'No Description',
                                 source: result.volumeInfo.infoLink
                             })) || [];
-            
+                
                             const crossrefResults = crossrefData.message?.items?.map(result => ({
                                 title: result.title[0] || 'No Title',
                                 description: result.abstract || 'No Description',
                                 source: result.URL
                             })) || [];
-            
+                
                             const peertubeResults = peertubeData.data?.map(video => ({
                                 title: video.name,
                                 description: video.description,
@@ -410,13 +420,13 @@
                                 instance: video.account.url,
                                 account: video.account.displayName
                             })) || [];
-
+                
                             const wikimediaCommonsResults = wikimediaCommonsData.query?.search?.map(result => ({
                                 title: result.title,
                                 description: result.snippet,
                                 source: `https://commons.wikimedia.org/wiki/${result.title}`
                             })) || [];
-            
+                
                             const allResults = [
                                 ...wikipediaResults,
                                 ...archiveResults,
@@ -428,13 +438,13 @@
                                 ...peertubeResults,
                                 ...wikimediaCommonsResults
                             ];
-            
+                
                             shuffleArray(allResults);
-            
+                
                             const resultsPerPage = 50;
                             const pages = Math.ceil(allResults.length / resultsPerPage);
                             const maxTabs = 10; // Maximum number of tabs to display
-            
+                
                             for (let i = 1; i <= Math.min(pages, maxTabs); i++) {
                                 const createTab = (container) => {
                                     const tabElement = document.createElement('div');
@@ -448,10 +458,10 @@
                                     });
                                     container.appendChild(tabElement);
                                 };
-            
+                
                                 createTab(topTabsContainer);
                                 createTab(bottomTabsContainer);
-            
+                
                                 const resultsPage = document.createElement('div');
                                 resultsPage.className = 'results';
                                 resultsPage.id = `results-page-${i}`;
@@ -476,7 +486,7 @@
                                 });
                                 searchResults.appendChild(resultsPage);
                             }
-            
+                
                             function shuffleArray(array) {
                                 for (let i = array.length - 1; i > 0; i--) {
                                     const j = Math.floor(Math.random() * (i + 1));
@@ -486,7 +496,7 @@
                         } catch (error) {
                             console.error('Error during search:', error);
                         }
-
+                
                         // Enable search button and reset text after search
                         searchButton.disabled = false;
                         searchButton.textContent = 'Search';
