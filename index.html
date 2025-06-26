@@ -1,10 +1,33 @@
 <!DOCTYPE html>
+<!--
+    Wisdom Search Engine - Enhanced with 14 Open APIs
+    
+    NEW APIS ADDED:
+    - Semantic Scholar: Academic papers and research (no API key required)
+    - News API: Global news articles (requires API key - replace 'demo' with your key)
+    - Pexels: High-quality stock photos (requires API key - replace 'demo' with your key)  
+    - Pixabay: Free images and videos (requires API key - replace 'demo' with your key)
+    - NASA: Astronomical images and data (DEMO_KEY works for limited use)
+    
+    TO ACTIVATE PAID APIS:
+    1. Get API keys from respective services
+    2. Replace 'demo' or 'YOUR_PEXELS_API_KEY' placeholders in the JavaScript
+    3. Some APIs work without keys (Semantic Scholar, NASA with DEMO_KEY)
+    
+    TOTAL SOURCES: 14 different APIs providing comprehensive search across:
+    - Academic papers (Semantic Scholar, Crossref)
+    - News articles (News API)
+    - Images & Videos (Pexels, Pixabay, Wikimedia Commons, PeerTube)
+    - Books & Literature (Google Books, Project Gutenberg, Open Library)
+    - Research Data (Harvard Dataverse, NASA)
+    - General Knowledge (Wikipedia, Archive.org)
+-->
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Wisdom Search Engine</title>
-    <meta name="description" content="Open Data and Open Knowledge Search Engine ">
-    <meta name="keywords" content="opensource, search engine, wikipedia, archive">
+    <meta name="description" content="Open Data and Open Knowledge Search Engine with 14 APIs">
+    <meta name="keywords" content="opensource, search engine, wikipedia, archive, academic papers, news, images">
     <meta name="author" content="André Machado">
     <meta name="robots" content="index, follow">
     <meta name="revisit-after" content="1 day">
@@ -311,7 +334,12 @@
                                 googleBooksResponse,
                                 crossrefResponse,
                                 peertubeResponse,
-                                wikimediaCommonsResponse
+                                wikimediaCommonsResponse,
+                                semanticScholarResponse,
+                                newsApiResponse,
+                                pexelsResponse,
+                                pixabayResponse,
+                                nasaResponse
                             ] = await Promise.all([
                                 fetch(`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${query}&format=json&origin=*`),
                                 fetch(`https://archive.org/advancedsearch.php?q=${query}&output=json`),
@@ -321,7 +349,14 @@
                                 fetch(`https://www.googleapis.com/books/v1/volumes?q=${query}`),
                                 fetch(`https://api.crossref.org/works?query=${query}`),
                                 fetch(`https://sepiasearch.org/api/v1/search/videos?search=${query}&searchTarget=search-index&resultType=videos&nsfw=false&count=100&start=0`),
-                                fetch(`https://commons.wikimedia.org/w/api.php?action=query&list=search&srsearch=${query}&srnamespace=6&format=json&origin=*`)
+                                fetch(`https://commons.wikimedia.org/w/api.php?action=query&list=search&srsearch=${query}&srnamespace=6&format=json&origin=*`),
+                                fetch(`https://api.semanticscholar.org/graph/v1/paper/search?query=${query}&limit=20`).catch(() => ({ ok: false })),
+                                fetch(`https://newsapi.org/v2/everything?q=${query}&apiKey=demo&pageSize=20`).catch(() => ({ ok: false })),
+                                fetch(`https://api.pexels.com/v1/search?query=${query}&per_page=20`, {
+                                    headers: { 'Authorization': 'demo' }
+                                }).catch(() => ({ ok: false })),
+                                fetch(`https://pixabay.com/api/?key=demo&q=${query}&image_type=photo&per_page=20`).catch(() => ({ ok: false })),
+                                fetch(`https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY&count=5`).catch(() => ({ ok: false }))
                             ]);
                 
                             // Check all responses
@@ -334,6 +369,11 @@
                             if (!crossrefResponse.ok) console.error('Crossref API request failed');
                             if (!peertubeResponse.ok) console.error('PeerTube API request failed');
                             if (!wikimediaCommonsResponse.ok) console.error('Wikimedia Commons API request failed');
+                            if (!semanticScholarResponse.ok) console.error('Semantic Scholar API request failed');
+                            if (!newsApiResponse.ok) console.error('News API request failed');
+                            if (!pexelsResponse.ok) console.error('Pexels API request failed');
+                            if (!pixabayResponse.ok) console.error('Pixabay API request failed');
+                            if (!nasaResponse.ok) console.error('NASA API request failed');
                 
                             // Parse all responses
                             const [
@@ -345,17 +385,27 @@
                                 googleBooksData,
                                 crossrefData,
                                 peertubeData,
-                                wikimediaCommonsData
+                                wikimediaCommonsData,
+                                semanticScholarData,
+                                newsApiData,
+                                pexelsData,
+                                pixabayData,
+                                nasaData
                             ] = await Promise.all([
-                                wikipediaResponse.json(),
-                                archiveResponse.json(),
-                                gutenbergResponse.json(),
-                                openLibraryResponse.json(),
-                                harvardDataverseResponse.json(),
-                                googleBooksResponse.json(),
-                                crossrefResponse.json(),
-                                peertubeResponse.json(),
-                                wikimediaCommonsResponse.json()
+                                wikipediaResponse.ok ? wikipediaResponse.json() : {},
+                                archiveResponse.ok ? archiveResponse.json() : {},
+                                gutenbergResponse.ok ? gutenbergResponse.json() : {},
+                                openLibraryResponse.ok ? openLibraryResponse.json() : {},
+                                harvardDataverseResponse.ok ? harvardDataverseResponse.json() : {},
+                                googleBooksResponse.ok ? googleBooksResponse.json() : {},
+                                crossrefResponse.ok ? crossrefResponse.json() : {},
+                                peertubeResponse.ok ? peertubeResponse.json() : {},
+                                wikimediaCommonsResponse.ok ? wikimediaCommonsResponse.json() : {},
+                                semanticScholarResponse.ok ? semanticScholarResponse.json() : {},
+                                newsApiResponse.ok ? newsApiResponse.json() : {},
+                                pexelsResponse.ok ? pexelsResponse.json() : {},
+                                pixabayResponse.ok ? pixabayResponse.json() : {},
+                                nasaResponse.ok ? nasaResponse.json() : {}
                             ]);
                 
                             console.log('Wikipedia Data:', wikipediaData);
@@ -367,6 +417,11 @@
                             console.log('Crossref Data:', crossrefData);
                             console.log('PeerTube Data:', peertubeData);
                             console.log('Wikimedia Commons Data:', wikimediaCommonsData);
+                            console.log('Semantic Scholar Data:', semanticScholarData);
+                            console.log('News API Data:', newsApiData);
+                            console.log('Pexels Data:', pexelsData);
+                            console.log('Pixabay Data:', pixabayData);
+                            console.log('NASA Data:', nasaData);
                 
                             // Process results
                             const wikipediaResults = wikipediaData.query?.search?.map(result => ({
@@ -427,6 +482,52 @@
                                 source: `https://commons.wikimedia.org/wiki/${result.title}`
                             })) || [];
                 
+                            const semanticScholarResults = semanticScholarData.data?.map(paper => ({
+                                title: paper.title || 'No Title',
+                                description: paper.abstract || paper.tldr?.text || 'No Abstract',
+                                source: paper.url || `https://www.semanticscholar.org/paper/${paper.paperId}`,
+                                authors: paper.authors?.map(author => author.name).join(', ') || 'Unknown Authors',
+                                year: paper.year || 'Unknown Year',
+                                citationCount: paper.citationCount || 0
+                            })) || [];
+
+                            const newsResults = newsApiData.articles?.map(article => ({
+                                title: article.title || 'No Title',
+                                description: article.description || 'No Description',
+                                source: article.url,
+                                thumbnail: article.urlToImage,
+                                date: new Date(article.publishedAt).toLocaleDateString(),
+                                sourceName: article.source.name
+                            })) || [];
+
+                            const pexelsResults = pexelsData.photos?.map(photo => ({
+                                title: `Photo by ${photo.photographer}`,
+                                description: photo.alt || 'High-quality stock photo',
+                                source: photo.url,
+                                thumbnail: photo.src.medium,
+                                photographer: photo.photographer,
+                                photographerUrl: photo.photographer_url
+                            })) || [];
+
+                            const pixabayResults = pixabayData.hits?.map(image => ({
+                                title: image.tags || 'Image',
+                                description: `${image.type} - ${image.tags}`,
+                                source: image.pageURL,
+                                thumbnail: image.webformatURL,
+                                user: image.user,
+                                downloads: image.downloads,
+                                likes: image.likes
+                            })) || [];
+
+                            const nasaResults = nasaData?.map(item => ({
+                                title: item.title || 'NASA Image',
+                                description: item.explanation || 'NASA astronomical image',
+                                source: item.hdurl || item.url,
+                                thumbnail: item.url,
+                                date: item.date,
+                                copyright: item.copyright
+                            })) || [];
+
                             const allResults = [
                                 ...wikipediaResults,
                                 ...archiveResults,
@@ -436,7 +537,12 @@
                                 ...googleBooksResults,
                                 ...crossrefResults,
                                 ...peertubeResults,
-                                ...wikimediaCommonsResults
+                                ...wikimediaCommonsResults,
+                                ...semanticScholarResults,
+                                ...newsResults,
+                                ...pexelsResults,
+                                ...pixabayResults,
+                                ...nasaResults
                             ];
                 
                             shuffleArray(allResults);
@@ -477,6 +583,15 @@
                                         <h2>${result.title}</h2>
                                         ${result.thumbnail ? `<img src="${result.thumbnail}" alt="Thumbnail" style="width:100%; height:auto; max-width:350px;">` : ''}
                                         ${result.date ? `<p><em>Date: ${result.date}</em></p>` : ''}
+                                        ${result.authors ? `<p><strong>Authors:</strong> ${result.authors}</p>` : ''}
+                                        ${result.year ? `<p><strong>Year:</strong> ${result.year}</p>` : ''}
+                                        ${result.citationCount !== undefined ? `<p><strong>Citations:</strong> ${result.citationCount}</p>` : ''}
+                                        ${result.sourceName ? `<p><strong>Source:</strong> ${result.sourceName}</p>` : ''}
+                                        ${result.photographer ? `<p><strong>Photo by:</strong> <a href="${result.photographerUrl}" target="_blank">${result.photographer}</a></p>` : ''}
+                                        ${result.user ? `<p><strong>User:</strong> ${result.user}</p>` : ''}
+                                        ${result.downloads ? `<p><strong>Downloads:</strong> ${result.downloads}</p>` : ''}
+                                        ${result.likes ? `<p><strong>Likes:</strong> ${result.likes}</p>` : ''}
+                                        ${result.copyright ? `<p><strong>Copyright:</strong> ${result.copyright}</p>` : ''}
                                         <p>${result.description}</p>
                                         <p>Source: <a href="${result.source}" target="_blank">${result.source}</a></p>
                                         ${result.instance ? `<p>By <a href="${result.instance}" target="_blank">${result.account}</a></p>` : ''}
